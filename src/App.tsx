@@ -59,51 +59,51 @@ Return only the improved prompt, ready to use.`, 'gpt-4o');
     <div className="min-h-screen bg-black flex items-center justify-center p-6">
       <Toaster />
       
-      <div className="w-full max-w-2xl space-y-12">
-        <div className="text-center space-y-2">
-          <h1 className="text-6xl font-bold tracking-tight text-white">
-            Dear.Dr
+      <div className="w-full max-w-3xl mx-auto space-y-12">
+        <div className="text-center space-y-3">
+          <h1 className="text-7xl font-bold tracking-tight text-white">
+            Basha
           </h1>
+          <p className="text-xl text-white/80 font-medium">
+            What do you want AI to do?
+          </p>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-4">
-            <label htmlFor="input" className="block text-lg text-white font-medium">
-              What do you want AI to do?
-            </label>
             <Textarea
               id="input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Type your request here..."
-              rows={8}
-              className="text-base resize-none bg-black text-white border-white focus-visible:ring-white focus-visible:ring-offset-0 placeholder:text-gray-500"
+              placeholder="Describe what you need..."
+              rows={10}
+              className="text-lg resize-none bg-white/5 text-white border-white/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0 focus-visible:border-white/40 placeholder:text-white/30 rounded-2xl px-6 py-5 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:border-white/30"
             />
           </div>
 
           <Button 
             onClick={handleGenerate} 
             disabled={isGenerating || !input.trim()}
-            className="w-full h-12 text-base font-medium bg-white text-black hover:bg-gray-200 disabled:bg-gray-800 disabled:text-gray-600"
+            className="w-full h-14 text-lg font-semibold bg-white text-black hover:bg-white/90 disabled:bg-white/10 disabled:text-white/30 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
             {isGenerating ? 'Processing...' : 'Make it Better'}
           </Button>
         </div>
 
         {result && (
-          <div className="space-y-4 border-t border-white pt-12">
+          <div className="space-y-6 border-t border-white/20 pt-12">
             <div className="space-y-4">
               <Textarea
                 value={result}
                 readOnly
                 rows={12}
-                className="text-base resize-none bg-black text-white border-white focus-visible:ring-white focus-visible:ring-offset-0"
+                className="text-lg resize-none bg-white/5 text-white border-white/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0 rounded-2xl px-6 py-5 backdrop-blur-sm"
               />
               <Button 
                 onClick={handleCopy}
                 variant="outline"
-                className="w-full h-12 text-base font-medium bg-black text-white border-white hover:bg-white hover:text-black"
+                className="w-full h-14 text-lg font-semibold bg-transparent text-white border-2 border-white/30 hover:bg-white hover:text-black rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               >
                 Copy
               </Button>

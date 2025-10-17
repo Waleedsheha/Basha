@@ -245,7 +245,7 @@ Return ONLY the improved prompt, ready to use. Make it professional, detailed, a
                   }
                 }}
                 onKeyDown={handleKeyPress}
-                placeholder="Describe what you need..."
+                placeholder=""
                 rows={1}
                 className="text-base resize-none min-h-[56px] max-h-[200px] bg-white/5 text-white border-white/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0 focus-visible:border-white/40 placeholder:text-white/30 rounded-2xl px-6 py-4 pr-24 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:border-white/30"
               />

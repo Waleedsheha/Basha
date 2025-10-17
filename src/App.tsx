@@ -55,6 +55,9 @@ Return only the improved prompt, ready to use.`, 'gpt-4o');
     }
   };
 
+  const characterCount = input.length;
+  const characterLimit = 1000;
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-6">
       <Toaster />
@@ -70,16 +73,23 @@ Return only the improved prompt, ready to use.`, 'gpt-4o');
         </div>
 
         <div className="space-y-6">
-          <div className="space-y-4">
+          <div className="space-y-2">
             <Textarea
               id="input"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value.length <= characterLimit) {
+                  setInput(e.target.value);
+                }
+              }}
               onKeyDown={handleKeyPress}
               placeholder="Describe what you need..."
-              rows={10}
-              className="text-lg resize-none bg-white/5 text-white border-white/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0 focus-visible:border-white/40 placeholder:text-white/30 rounded-2xl px-6 py-5 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:border-white/30"
+              rows={4}
+              className="text-lg resize-y min-h-[120px] max-h-[400px] bg-white/5 text-white border-white/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0 focus-visible:border-white/40 placeholder:text-white/30 rounded-2xl px-6 py-5 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:border-white/30"
             />
+            <div className="text-right text-sm text-white/40">
+              {characterCount}/{characterLimit}
+            </div>
           </div>
 
           <Button 
@@ -87,7 +97,7 @@ Return only the improved prompt, ready to use.`, 'gpt-4o');
             disabled={isGenerating || !input.trim()}
             className="w-full h-14 text-lg font-semibold bg-white text-black hover:bg-white/90 disabled:bg-white/10 disabled:text-white/30 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
-            {isGenerating ? 'Processing...' : 'Make it Better'}
+            {isGenerating ? 'Processing...' : 'Tamam'}
           </Button>
         </div>
 

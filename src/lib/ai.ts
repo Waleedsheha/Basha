@@ -21,7 +21,7 @@ Tech Stack: ${project.techStack.join(', ')}
   
   switch (type) {
     case 'code-generation':
-      systemPrompt = spark.llmPrompt`You are an expert prompt engineer. Generate an optimized prompt for AI code generation.
+      systemPrompt = `You are an expert prompt engineer. Generate an optimized prompt for AI code generation.
 
 ${baseContext}
 
@@ -42,7 +42,7 @@ Format the output as a ready-to-use prompt that can be directly sent to an AI co
       break;
       
     case 'architecture-design':
-      systemPrompt = spark.llmPrompt`You are an expert prompt engineer. Generate an optimized prompt for AI architecture design.
+      systemPrompt = `You are an expert prompt engineer. Generate an optimized prompt for AI architecture design.
 
 ${baseContext}
 
@@ -63,7 +63,7 @@ Format the output as a ready-to-use prompt for getting detailed architecture rec
       break;
       
     case 'testing':
-      systemPrompt = spark.llmPrompt`You are an expert prompt engineer. Generate an optimized prompt for AI-assisted testing.
+      systemPrompt = `You are an expert prompt engineer. Generate an optimized prompt for AI-assisted testing.
 
 ${baseContext}
 
@@ -84,7 +84,7 @@ Format the output as a ready-to-use prompt for generating comprehensive tests.`;
       break;
       
     case 'documentation':
-      systemPrompt = spark.llmPrompt`You are an expert prompt engineer. Generate an optimized prompt for AI documentation generation.
+      systemPrompt = `You are an expert prompt engineer. Generate an optimized prompt for AI documentation generation.
 
 ${baseContext}
 
@@ -105,7 +105,7 @@ Format the output as a ready-to-use prompt for generating clear, comprehensive d
       break;
       
     case 'refactoring':
-      systemPrompt = spark.llmPrompt`You are an expert prompt engineer. Generate an optimized prompt for AI code refactoring.
+      systemPrompt = `You are an expert prompt engineer. Generate an optimized prompt for AI code refactoring.
 
 ${baseContext}
 
@@ -126,7 +126,7 @@ Format the output as a ready-to-use prompt for safe, effective code refactoring.
       break;
       
     case 'debugging':
-      systemPrompt = spark.llmPrompt`You are an expert prompt engineer. Generate an optimized prompt for AI-assisted debugging.
+      systemPrompt = `You are an expert prompt engineer. Generate an optimized prompt for AI-assisted debugging.
 
 ${baseContext}
 
@@ -151,7 +151,7 @@ Format the output as a ready-to-use prompt for effective bug resolution.`;
 }
 
 export async function generateArchitecture(requirements: string, project: Project): Promise<any> {
-  const prompt = spark.llmPrompt`You are a senior software architect. Design a comprehensive technical architecture for the following project.
+  const prompt = `You are a senior software architect. Design a comprehensive technical architecture for the following project.
 
 Project: ${project.name}
 Description: ${project.description}

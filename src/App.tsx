@@ -1,248 +1,219 @@
-import { useKV } from '@github/spark/hooks';
-import { useState, useEffect } from 'react';
-import { Project, Template } from '@/lib/types';
-import { ProjectDialog } from '@/components/ProjectDialog';
-import { PromptGenerator } from '@/components/PromptGenerator';
-import { ArchitecturePlanner } from '@/components/ArchitecturePlanner';
-import { TemplateLibrary } from '@/components/TemplateLibrary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Lightbulb, TreeStructure, FileText, Trash, Sparkle } from '@phosphor-icons/react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Lightbulb, Copy, Check, Sparkle } from '@phosphor-icons/react';
+import { useState } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
+type PromptType = 'code-generation' | 'architecture-design' | 'testing' | 'documentation' | 'refactoring' | 'debugging';
+
+const promptTypes: { value: PromptType; label: string; description: string }[] = [
+  { 
+    value: 'code-generation', 
+    label: 'Code Generation',
+    description: 'Generate code snippets and implementations'
+  },
+  { 
+    value: 'architecture-design', 
+    label: 'Architecture Design',
+    description: 'Design system architecture and component structure'
+  },
+  { 
+    value: 'testing', 
+    label: 'Testing',
+    description: 'Create unit tests, integration tests, and test strategies'
+  },
+  { 
+    value: 'documentation', 
+    label: 'Documentation',
+    description: 'Generate technical documentation and guides'
+  },
+  { 
+    value: 'refactoring', 
+    label: 'Refactoring',
+    description: 'Improve code quality and structure'
+  },
+  { 
+    value: 'debugging', 
+    label: 'Debugging',
+    description: 'Identify and fix bugs and issues'
+  },
+];
+
 function App() {
-  const [projects, setProjects] = useKV<Project[]>('ai-architect-projects', []);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'templates' | 'project'>('templates');
+  const [promptType, setPromptType] = useState<PromptType>('code-generation');
+  const [context, setContext] = useState('');
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const projectsList = projects || [];
-  const selectedProject = projectsList.find(p => p.id === selectedProjectId);
-
-  useEffect(() => {
-    if (projectsList.length > 0 && !selectedProjectId) {
-      setSelectedProjectId(projectsList[0].id);
-      setActiveView('project');
+  const handleGenerate = async () => {
+    if (!context.trim()) {
+      toast.error('Please provide context for the prompt');
+      return;
     }
-  }, [projectsList.length, selectedProjectId]);
 
-  const handleCreateProject = (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newProject: Project = {
-      ...projectData,
-      id: `project-${Date.now()}`,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    
-    setProjects((current) => [...(current || []), newProject]);
-    setSelectedProjectId(newProject.id);
-    setActiveView('project');
-    toast.success(`Project "${newProject.name}" created!`);
-  };
+    setIsGenerating(true);
+    try {
+      const selectedTypeInfo = promptTypes.find(t => t.value === promptType);
+      
+      const systemPrompt = spark.llmPrompt`You are an expert at crafting effective prompts for AI coding assistants. Generate a well-structured, detailed prompt that will help an AI assistant understand exactly what the user needs.
 
-  const handleSelectTemplate = (template: Template) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      name: template.name,
-      description: template.description,
-      category: template.category,
-      techStack: template.techStack,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    
-    setProjects((current) => [...(current || []), newProject]);
-    setSelectedProjectId(newProject.id);
-    setActiveView('project');
-    toast.success(`Project created from template!`);
-  };
+Prompt Type: ${promptType}
+Type Description: ${selectedTypeInfo?.description}
+User Context: ${context}
 
-  const handleDeleteProject = (projectId: string) => {
-    if (confirm('Are you sure you want to delete this project?')) {
-      setProjects((current) => (current || []).filter(p => p.id !== projectId));
-      if (selectedProjectId === projectId) {
-        setSelectedProjectId(null);
-        setActiveView('templates');
-      }
-      toast.success('Project deleted');
+Create an optimized prompt that:
+- Clearly states the objective
+- Provides necessary context and constraints
+- Specifies the expected output format
+- Includes any relevant technical details
+- Uses best practices for AI prompt engineering
+
+Return only the generated prompt, ready to be copied and used.`;
+
+      const result = await spark.llm(systemPrompt, 'gpt-4o');
+      setGeneratedPrompt(result);
+      toast.success('Prompt generated successfully!');
+    } catch (error) {
+      toast.error('Failed to generate prompt');
+      console.error(error);
+    } finally {
+      setIsGenerating(false);
     }
   };
+
+  const handleCopy = async () => {
+    if (!generatedPrompt) return;
+    
+    try {
+      await navigator.clipboard.writeText(generatedPrompt);
+      setCopied(true);
+      toast.success('Copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  const selectedType = promptTypes.find(t => t.value === promptType);
 
   return (
-    <div className="h-screen flex bg-background">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Toaster />
       
-      <aside className="w-80 border-r bg-card flex flex-col">
-        <div className="p-6 border-b">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkle className="text-accent" size={32} weight="fill" />
-            <h1 className="text-2xl font-bold tracking-tight">AI App Architect</h1>
+      <div className="w-full max-w-3xl">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <Sparkle className="text-accent" size={40} weight="fill" />
+            <h1 className="text-4xl font-bold tracking-tight">AI Prompt Generator</h1>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Plan, prompt, and architect AI applications
+          <p className="text-muted-foreground text-lg">
+            Create optimized prompts for AI-assisted development
           </p>
         </div>
 
-        <div className="p-4 border-b">
-          <ProjectDialog onSave={handleCreateProject} />
-        </div>
-
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="p-4">
-              <div className="mb-4">
-                <Button
-                  variant={activeView === 'templates' ? 'secondary' : 'ghost'}
-                  className="w-full justify-start"
-                  onClick={() => setActiveView('templates')}
-                >
-                  <FileText className="mr-2" />
-                  Template Library
-                </Button>
-              </div>
-
-              {projectsList.length > 0 && (
-                <>
-                  <Separator className="mb-4" />
-                  <div className="space-y-1">
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                      Your Projects
-                    </h3>
-                    {projectsList.map((project) => (
-                      <div
-                        key={project.id}
-                        className={`group flex items-center gap-2 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors ${
-                          selectedProjectId === project.id && activeView === 'project'
-                            ? 'bg-muted'
-                            : ''
-                        }`}
-                        onClick={() => {
-                          setSelectedProjectId(project.id);
-                          setActiveView('project');
-                        }}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate">{project.name}</div>
-                          <div className="text-xs text-muted-foreground capitalize">
-                            {project.category.replace('-', ' ')}
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteProject(project.id);
-                          }}
-                        >
-                          <Trash size={14} className="text-destructive" />
-                        </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lightbulb className="text-accent" />
+              Generate AI Prompt
+            </CardTitle>
+            <CardDescription>
+              Describe what you need and get a well-crafted prompt
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="prompt-type">Prompt Type</Label>
+              <Select value={promptType} onValueChange={(v) => setPromptType(v as PromptType)}>
+                <SelectTrigger id="prompt-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {promptTypes.map(type => (
+                    <SelectItem key={type.value} value={type.value}>
+                      <div>
+                        <div className="font-medium">{type.label}</div>
+                        <div className="text-xs text-muted-foreground">{type.description}</div>
                       </div>
-                    ))}
-                  </div>
-                </>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedType && (
+                <p className="text-sm text-muted-foreground">{selectedType.description}</p>
               )}
             </div>
-          </ScrollArea>
-        </div>
 
-        <div className="p-4 border-t bg-muted/30">
-          <div className="text-xs text-muted-foreground">
-            <div className="font-medium mb-1">Next-Gen AI Planning</div>
-            <div>Powered by GPT-4 and modern best practices</div>
-          </div>
-        </div>
-      </aside>
+            <div className="grid gap-2">
+              <Label htmlFor="context">What do you need help with?</Label>
+              <Textarea
+                id="context"
+                value={context}
+                onChange={(e) => setContext(e.target.value)}
+                placeholder="Describe what you need in detail. Be specific about features, requirements, constraints, or problems you're trying to solve..."
+                rows={8}
+                className="font-mono text-sm resize-none"
+              />
+            </div>
 
-      <main className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="max-w-5xl mx-auto p-6">
-            {activeView === 'templates' ? (
-              <TemplateLibrary onSelectTemplate={handleSelectTemplate} />
-            ) : selectedProject ? (
-              <>
-                <div className="mb-6">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h1 className="text-3xl font-bold tracking-tight mb-2">
-                        {selectedProject.name}
-                      </h1>
-                      <p className="text-muted-foreground">{selectedProject.description}</p>
-                    </div>
-                    <ProjectDialog
-                      project={selectedProject}
-                      onSave={(data) => {
-                        setProjects((current) =>
-                          (current || []).map((p) =>
-                            p.id === selectedProject.id
-                              ? { ...p, ...data, updatedAt: Date.now() }
-                              : p
-                          )
-                        );
-                        toast.success('Project updated');
-                      }}
-                      trigger={<Button variant="outline">Edit Project</Button>}
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    <Badge variant="secondary" className="capitalize">
-                      {selectedProject.category.replace('-', ' ')}
-                    </Badge>
-                    {selectedProject.techStack.map((tech) => (
-                      <Badge key={tech} variant="outline">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+            <Button 
+              onClick={handleGenerate} 
+              disabled={isGenerating || !context.trim()}
+              className="w-full"
+              size="lg"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-pulse-glow mr-2">Generating...</div>
+                </>
+              ) : (
+                <>
+                  <Lightbulb className="mr-2" />
+                  Generate Prompt
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
 
-                <Tabs defaultValue="prompts" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-6">
-                    <TabsTrigger value="prompts" className="gap-2">
-                      <Lightbulb size={18} />
-                      Prompt Generator
-                    </TabsTrigger>
-                    <TabsTrigger value="architecture" className="gap-2">
-                      <TreeStructure size={18} />
-                      Architecture Planner
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="prompts">
-                    <PromptGenerator project={selectedProject} />
-                  </TabsContent>
-
-                  <TabsContent value="architecture">
-                    <ArchitecturePlanner project={selectedProject} />
-                  </TabsContent>
-                </Tabs>
-              </>
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Welcome to AI App Architect</CardTitle>
-                  <CardDescription>
-                    Create a new project or select a template to get started
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-4">
-                    <ProjectDialog onSave={handleCreateProject} />
-                    <Button variant="outline" onClick={() => setActiveView('templates')}>
-                      Browse Templates
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </ScrollArea>
-      </main>
+        {generatedPrompt && (
+          <Card className="mt-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Generated Prompt</CardTitle>
+                <Button variant="outline" size="sm" onClick={handleCopy}>
+                  {copied ? (
+                    <>
+                      <Check className="mr-2" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-2" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+              <CardDescription>
+                Use this optimized prompt with your AI assistant
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted rounded-lg p-4">
+                <pre className="whitespace-pre-wrap font-mono text-sm text-foreground">
+                  {generatedPrompt}
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

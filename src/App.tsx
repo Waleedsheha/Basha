@@ -1,85 +1,44 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Lightbulb, Copy, Check, Sparkle } from '@phosphor-icons/react';
+import { Copy, Check, Sparkle, Star, MagicWand } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
-
-type PromptType = 'code-generation' | 'architecture-design' | 'testing' | 'documentation' | 'refactoring' | 'debugging';
-
-const promptTypes: { value: PromptType; label: string; description: string }[] = [
-  { 
-    value: 'code-generation', 
-    label: 'Code Generation',
-    description: 'Generate code snippets and implementations'
-  },
-  { 
-    value: 'architecture-design', 
-    label: 'Architecture Design',
-    description: 'Design system architecture and component structure'
-  },
-  { 
-    value: 'testing', 
-    label: 'Testing',
-    description: 'Create unit tests, integration tests, and test strategies'
-  },
-  { 
-    value: 'documentation', 
-    label: 'Documentation',
-    description: 'Generate technical documentation and guides'
-  },
-  { 
-    value: 'refactoring', 
-    label: 'Refactoring',
-    description: 'Improve code quality and structure'
-  },
-  { 
-    value: 'debugging', 
-    label: 'Debugging',
-    description: 'Identify and fix bugs and issues'
-  },
-];
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
-  const [promptType, setPromptType] = useState<PromptType>('code-generation');
-  const [context, setContext] = useState('');
-  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleGenerate = async () => {
-    if (!context.trim()) {
-      toast.error('Please provide context for the prompt');
+    if (!input.trim()) {
+      toast.error('Please enter what you want to ask AI');
       return;
     }
 
     setIsGenerating(true);
     try {
-      const selectedTypeInfo = promptTypes.find(t => t.value === promptType);
-      
-      const systemPrompt = spark.llmPrompt`You are an expert at crafting effective prompts for AI coding assistants. Generate a well-structured, detailed prompt that will help an AI assistant understand exactly what the user needs.
+      const promptText = `You are an expert at improving prompts for AI assistants. Take the user's simple request and transform it into a clear, effective prompt that will get better results from AI.
 
-Prompt Type: ${promptType}
-Type Description: ${selectedTypeInfo?.description}
-User Context: ${context}
+User's request: ${input}
 
-Create an optimized prompt that:
-- Clearly states the objective
-- Provides necessary context and constraints
-- Specifies the expected output format
-- Includes any relevant technical details
-- Uses best practices for AI prompt engineering
+Create an improved prompt that:
+- Is clear and specific
+- Includes helpful context
+- Asks for the right output format
+- Will get better AI results
 
-Return only the generated prompt, ready to be copied and used.`;
+Return only the improved prompt, ready to use.`;
 
-      const result = await spark.llm(systemPrompt, 'gpt-4o');
-      setGeneratedPrompt(result);
-      toast.success('Prompt generated successfully!');
+      const improvedPrompt = await spark.llm(promptText, 'gpt-4o');
+      setResult(improvedPrompt);
+      toast.success('Your improved prompt is ready!');
     } catch (error) {
-      toast.error('Failed to generate prompt');
+      toast.error('Something went wrong. Please try again.');
       console.error(error);
     } finally {
       setIsGenerating(false);
@@ -87,132 +46,159 @@ Return only the generated prompt, ready to be copied and used.`;
   };
 
   const handleCopy = async () => {
-    if (!generatedPrompt) return;
+    if (!result) return;
     
     try {
-      await navigator.clipboard.writeText(generatedPrompt);
+      await navigator.clipboard.writeText(result);
       setCopied(true);
-      toast.success('Copied to clipboard!');
+      toast.success('Copied!');
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      toast.error('Failed to copy to clipboard');
+      toast.error('Could not copy. Please try again.');
     }
   };
 
-  const selectedType = promptTypes.find(t => t.value === promptType);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      handleGenerate();
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center p-4">
       <Toaster />
       
-      <div className="w-full max-w-3xl">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <Sparkle className="text-accent" size={40} weight="fill" />
-            <h1 className="text-4xl font-bold tracking-tight">AI Prompt Generator</h1>
-          </div>
-          <p className="text-muted-foreground text-lg">
-            Create optimized prompts for AI-assisted development
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="text-accent" />
-              Generate AI Prompt
-            </CardTitle>
-            <CardDescription>
-              Describe what you need and get a well-crafted prompt
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="prompt-type">Prompt Type</Label>
-              <Select value={promptType} onValueChange={(v) => setPromptType(v as PromptType)}>
-                <SelectTrigger id="prompt-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {promptTypes.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
-                      <div>
-                        <div className="font-medium">{type.label}</div>
-                        <div className="text-xs text-muted-foreground">{type.description}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedType && (
-                <p className="text-sm text-muted-foreground">{selectedType.description}</p>
-              )}
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="context">What do you need help with?</Label>
-              <Textarea
-                id="context"
-                value={context}
-                onChange={(e) => setContext(e.target.value)}
-                placeholder="Describe what you need in detail. Be specific about features, requirements, constraints, or problems you're trying to solve..."
-                rows={8}
-                className="font-mono text-sm resize-none"
-              />
-            </div>
-
-            <Button 
-              onClick={handleGenerate} 
-              disabled={isGenerating || !context.trim()}
-              className="w-full"
-              size="lg"
+      <div className="w-full max-w-4xl">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <motion.div
+              animate={{ 
+                rotate: [0, 5, -5, 0],
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             >
-              {isGenerating ? (
-                <>
-                  <div className="animate-pulse-glow mr-2">Generating...</div>
-                </>
-              ) : (
-                <>
-                  <Lightbulb className="mr-2" />
-                  Generate Prompt
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+              <Sparkle className="text-accent" size={48} weight="duotone" />
+            </motion.div>
+            <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Prompt Improver
+            </h1>
+          </div>
+          <p className="text-muted-foreground text-xl">
+            Turn your ideas into better AI prompts
+          </p>
+        </motion.div>
 
-        {generatedPrompt && (
-          <Card className="mt-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Generated Prompt</CardTitle>
-                <Button variant="outline" size="sm" onClick={handleCopy}>
-                  {copied ? (
-                    <>
-                      <Check className="mr-2" />
-                      Copied
-                    </>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <Card className="border-2 shadow-xl backdrop-blur">
+            <CardContent className="p-8">
+              <div className="grid gap-6">
+                <div className="grid gap-3">
+                  <Label htmlFor="input" className="text-lg font-semibold flex items-center gap-2">
+                    <Star className="text-accent" size={20} weight="duotone" />
+                    What do you want to ask AI?
+                  </Label>
+                  <Textarea
+                    id="input"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Example: write a function that sorts an array..."
+                    rows={6}
+                    className="text-base resize-none focus-visible:ring-2 focus-visible:ring-accent transition-all"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Press {navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Enter to generate
+                  </p>
+                </div>
+
+                <Button 
+                  onClick={handleGenerate} 
+                  disabled={isGenerating || !input.trim()}
+                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity shadow-lg"
+                  size="lg"
+                >
+                  {isGenerating ? (
+                    <motion.div 
+                      className="flex items-center gap-2"
+                      initial={{ opacity: 0.5 }}
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <MagicWand size={24} />
+                      Creating magic...
+                    </motion.div>
                   ) : (
                     <>
-                      <Copy className="mr-2" />
-                      Copy
+                      <MagicWand className="mr-2" size={24} />
+                      Make it Better
                     </>
                   )}
                 </Button>
               </div>
-              <CardDescription>
-                Use this optimized prompt with your AI assistant
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted rounded-lg p-4">
-                <pre className="whitespace-pre-wrap font-mono text-sm text-foreground">
-                  {generatedPrompt}
-                </pre>
-              </div>
             </CardContent>
           </Card>
-        )}
+        </motion.div>
+
+        <AnimatePresence>
+          {result && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="mt-8 border-2 border-accent/20 shadow-xl backdrop-blur">
+                <CardContent className="p-8">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Sparkle className="text-accent" size={24} weight="duotone" />
+                      <h2 className="text-2xl font-bold">Your Improved Prompt</h2>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      onClick={handleCopy}
+                      className="border-2 hover:bg-accent/10 hover:border-accent transition-colors"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="mr-2" size={20} weight="bold" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="mr-2" size={20} />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <div className="bg-gradient-to-br from-accent/5 to-primary/5 border-2 border-accent/20 rounded-xl p-6">
+                    <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
+                      {result}
+                    </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4 text-center">
+                    Copy this and paste it into ChatGPT, Claude, or any AI assistant
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

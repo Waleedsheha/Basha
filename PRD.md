@@ -1,89 +1,97 @@
 # Planning Guide
 
-A simple, focused tool for generating optimized AI prompts using AI itself.
+A simple tool that takes your rough ideas and turns them into better prompts for AI assistants.
 
 **Experience Qualities**:
-1. **Simple** - Clean, minimal interface with a single clear purpose
-2. **Fast** - Quick generation with immediate copy-to-clipboard functionality
-3. **Intelligent** - AI-powered prompt optimization for better results
+1. **Simple** - No technical jargon, just type what you want
+2. **Visual** - Beautiful gradients and smooth animations that feel modern
+3. **Instant** - Get improved prompts in seconds with one click
 
 **Complexity Level**: Micro Tool (single-purpose)
-  - Single-page application focused exclusively on prompt generation with no complex state management
+  - Ultra-focused app that does one thing perfectly: improves AI prompts
 
 ## Essential Features
 
-### AI Prompt Generation
-- **Functionality**: Takes user's request description and prompt type (code, architecture, testing, etc.) and uses AI to generate an optimized, well-structured prompt
-- **Purpose**: Helps users create better prompts for AI assistants, resulting in higher quality outputs
-- **Trigger**: User enters context and clicks "Generate Prompt"
-- **Progression**: Select prompt type → Enter description → Click generate → AI creates optimized prompt → Copy to clipboard
-- **Success criteria**: Generated prompts are comprehensive, well-structured, and produce better AI results than user's original description
+### Prompt Improvement
+- **Functionality**: User types a simple request, AI transforms it into a better, more effective prompt
+- **Purpose**: Help anyone get better results from AI assistants without needing to be a "prompt engineering expert"
+- **Trigger**: User types their idea and clicks "Make it Better" or presses Cmd/Ctrl+Enter
+- **Progression**: Type idea → Click button → AI improves it → Copy and use
+- **Success criteria**: Generated prompts are clearer, more specific, and produce noticeably better AI results
 
 ## Edge Case Handling
-- **Empty Input**: Disable generate button and show validation error if context is empty
-- **Long Generation**: Show loading state during AI processing
-- **Copy Failures**: Handle clipboard API errors gracefully with toast notifications
-- **Network Issues**: Display clear error messages when AI calls fail
+- **Empty Input**: Show friendly error message and disable button
+- **AI Processing**: Show engaging loading animation with "Creating magic..." message
+- **Copy Action**: Give instant feedback with "Copied!" confirmation
+- **Errors**: Display simple, non-technical error messages
 
 ## Design Direction
-The design should feel modern and minimal—a clean, focused tool that gets out of the way and lets users accomplish one thing perfectly. Minimal interface serves the single purpose without distractions.
+The design should feel magical and delightful—like a modern, polished tool that makes AI more accessible. Beautiful gradients, smooth animations, and clear typography create an experience that feels premium yet approachable.
 
 ## Color Selection
-Triadic color scheme with vibrant accent creating visual interest while maintaining professionalism
+Vibrant gradient scheme with purple/indigo and cyan creating an energetic, modern feel
 
-- **Primary Color**: Deep indigo `oklch(0.35 0.15 270)` - Intelligence and technical sophistication
-- **Secondary Colors**: Steel blue `oklch(0.55 0.12 240)` for card backgrounds
-- **Accent Color**: Vibrant cyan `oklch(0.70 0.15 200)` - Energetic highlight for CTAs and AI elements
+- **Primary Color**: Rich purple `oklch(0.45 0.20 270)` - Represents intelligence and creativity
+- **Secondary Colors**: Deep blue `oklch(0.60 0.18 250)` for depth and variety
+- **Accent Color**: Vibrant cyan `oklch(0.70 0.20 200)` - Energetic highlight for CTAs and magic moments
 - **Foreground/Background Pairings**:
-  - Background (White `oklch(0.98 0 0)`): Dark indigo text `oklch(0.20 0.08 270)` - Ratio 12.5:1 ✓
-  - Card (Light gray `oklch(0.96 0.005 270)`): Primary text `oklch(0.20 0.08 270)` - Ratio 11.8:1 ✓
-  - Primary (Deep indigo `oklch(0.35 0.15 270)`): White text `oklch(0.98 0 0)` - Ratio 8.2:1 ✓
-  - Accent (Vibrant cyan `oklch(0.70 0.15 200)`): Dark text `oklch(0.20 0.08 270)` - Ratio 7.5:1 ✓
+  - Background (Soft white `oklch(0.99 0.005 270)`): Dark text `oklch(0.20 0.08 270)` - Ratio 14:1 ✓
+  - Card (Light gray `oklch(0.98 0.008 270)`): Primary text `oklch(0.20 0.08 270)` - Ratio 13:1 ✓
+  - Primary (Purple `oklch(0.45 0.20 270)`): White text `oklch(0.98 0 0)` - Ratio 7.8:1 ✓
+  - Accent (Cyan `oklch(0.70 0.20 200)`): Dark text `oklch(0.15 0.08 270)` - Ratio 9.2:1 ✓
 
 ## Font Selection
-Inter for its excellent readability and modern feel, JetBrains Mono for code/technical content
+Inter for clarity and modern feel - easy to read, friendly, and professional
 
 - **Typographic Hierarchy**:
-  - H1 (App Title): Inter Bold/36px/tight tracking/-0.02em
-  - H2 (Card Title): Inter SemiBold/20px/normal
-  - Body (Content): Inter Regular/15px/line-height/1.6
-  - Caption (Helper text): Inter Regular/14px/text-muted-foreground
-  - Code (Generated prompts): JetBrains Mono Regular/14px/line-height/1.5
+  - H1 (Title): Inter Bold/48px/tight tracking with gradient
+  - H2 (Section): Inter Bold/24px/normal
+  - Body (Description): Inter Regular/20px for tagline, 16px for content
+  - Labels: Inter Semibold/18px/normal
+  - Hints: Inter Regular/14px/muted color
 
 ## Animations
-Subtle, purposeful animations that feel modern without being distracting
+Delightful, purposeful animations that create a sense of magic without being distracting
 
-- **Purposeful Meaning**: Gentle pulse during AI generation, smooth transitions for state changes
+- **Purposeful Meaning**: 
+  - Icon wobble on page load (welcoming)
+  - Gradient background flow (alive and dynamic)
+  - Pulsing opacity during AI generation (working)
+  - Smooth card appearances with scale and fade (polished)
+  
 - **Hierarchy of Movement**:
-  - AI generation: Pulse glow animation (2000ms)
-  - Button interactions: Quick hover/press states (150ms)
-  - Toast notifications: Slide in/out (300ms)
+  - Page load: Staggered fade-in with upward motion (600ms)
+  - AI generation: Pulsing text animation (1500ms loop)
+  - Result appearance: Fade + slide up (400ms)
+  - Button interactions: Quick color transitions (150ms)
 
 ## Component Selection
 - **Components**:
-  - Card: Container for main interface with subtle shadows
-  - Select: Dropdown for prompt type selection
-  - Textarea: Large multi-line input for context
-  - Button: Primary action with loading states
-  - Toast: Notifications for success/error feedback
+  - Card: Clean containers with subtle borders and shadows
+  - Textarea: Large, comfortable input with focus ring
+  - Button: Prominent gradient button with icon
+  - Toast: Success/error notifications via Sonner
   
 - **States**:
-  - Buttons: Hover with subtle scale, disabled with reduced opacity, loading with pulse animation
-  - Textarea: Focus with accent border glow
-  - Generated output: Copy button with check confirmation state
+  - Button: Gradient background with opacity change on hover, disabled with lower opacity, loading with pulsing text
+  - Textarea: Accent-colored focus ring (2px), smooth transition
+  - Results: Gradient background container with accent border
   
 - **Icon Selection**:
-  - Sparkle for branding/title
-  - Lightbulb for prompt generation
+  - Sparkle for main branding (duotone for depth)
+  - Star for input label
+  - MagicWand for the action button
   - Copy for clipboard action
   - Check for confirmation
   
 - **Spacing**:
-  - Container: max-w-3xl centered with p-4 padding
-  - Card padding: p-6 for content
-  - Form gaps: gap-6 between major sections, gap-2 between labels and inputs
+  - Container: max-w-4xl centered with p-4
+  - Cards: p-8 for generous breathing room
+  - Sections: gap-6 between major elements, gap-3 for related items
+  - Title area: mb-12 for strong separation
   
 - **Mobile**:
-  - Single column layout works naturally on mobile
-  - Reduced text sizes and padding for mobile (p-3)
-  - Touch-friendly button sizes (min-h-11)
+  - Fully responsive with single column
+  - Reduced title size (text-4xl → text-3xl)
+  - Maintained touch-friendly button sizes (h-14)
+  - Optimized spacing for smaller screens

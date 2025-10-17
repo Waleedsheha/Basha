@@ -1,28 +1,23 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Check, Sparkle, Star, MagicWand } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const handleGenerate = async () => {
     if (!input.trim()) {
-      toast.error('Please enter what you want to ask AI');
+      toast.error('Please enter what you want AI to do');
       return;
     }
 
     setIsGenerating(true);
     try {
-      const promptText = `You are an expert at improving prompts for AI assistants. Take the user's simple request and transform it into a clear, effective prompt that will get better results from AI.
+      const improvedPrompt = await spark.llm(`You are an expert at improving prompts for AI assistants. Take the user's simple request and transform it into a clear, effective prompt that will get better results from AI.
 
 User's request: ${input}
 
@@ -32,11 +27,9 @@ Create an improved prompt that:
 - Asks for the right output format
 - Will get better AI results
 
-Return only the improved prompt, ready to use.`;
-
-      const improvedPrompt = await spark.llm(promptText, 'gpt-4o');
+Return only the improved prompt, ready to use.`, 'gpt-4o');
       setResult(improvedPrompt);
-      toast.success('Your improved prompt is ready!');
+      toast.success('Your improved prompt is ready');
     } catch (error) {
       toast.error('Something went wrong. Please try again.');
       console.error(error);
@@ -50,9 +43,7 @@ Return only the improved prompt, ready to use.`;
     
     try {
       await navigator.clipboard.writeText(result);
-      setCopied(true);
-      toast.success('Copied!');
-      setTimeout(() => setCopied(false), 2000);
+      toast.success('Copied to clipboard');
     } catch (error) {
       toast.error('Could not copy. Please try again.');
     }
@@ -65,140 +56,60 @@ Return only the improved prompt, ready to use.`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-6">
       <Toaster />
       
-      <div className="w-full max-w-4xl">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <motion.div
-              animate={{ 
-                rotate: [0, 5, -5, 0],
-              }}
-              transition={{ 
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              <Sparkle className="text-accent" size={48} weight="duotone" />
-            </motion.div>
-            <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Prompt Improver
-            </h1>
+      <div className="w-full max-w-2xl space-y-12">
+        <div className="text-center space-y-2">
+          <h1 className="text-6xl font-bold tracking-tight text-white">
+            Dear.Dr
+          </h1>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <label htmlFor="input" className="block text-lg text-white font-medium">
+              What do you want AI to do?
+            </label>
+            <Textarea
+              id="input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="Type your request here..."
+              rows={8}
+              className="text-base resize-none bg-black text-white border-white focus-visible:ring-white focus-visible:ring-offset-0 placeholder:text-gray-500"
+            />
           </div>
-          <p className="text-muted-foreground text-xl">
-            Turn your ideas into better AI prompts
-          </p>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
-          <Card className="border-2 shadow-xl backdrop-blur">
-            <CardContent className="p-8">
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="input" className="text-lg font-semibold flex items-center gap-2">
-                    <Star className="text-accent" size={20} weight="duotone" />
-                    What do you want to ask AI?
-                  </Label>
-                  <Textarea
-                    id="input"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyPress}
-                    placeholder="Example: write a function that sorts an array..."
-                    rows={6}
-                    className="text-base resize-none focus-visible:ring-2 focus-visible:ring-accent transition-all"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Press {navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Enter to generate
-                  </p>
-                </div>
+          <Button 
+            onClick={handleGenerate} 
+            disabled={isGenerating || !input.trim()}
+            className="w-full h-12 text-base font-medium bg-white text-black hover:bg-gray-200 disabled:bg-gray-800 disabled:text-gray-600"
+          >
+            {isGenerating ? 'Processing...' : 'Make it Better'}
+          </Button>
+        </div>
 
-                <Button 
-                  onClick={handleGenerate} 
-                  disabled={isGenerating || !input.trim()}
-                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity shadow-lg"
-                  size="lg"
-                >
-                  {isGenerating ? (
-                    <motion.div 
-                      className="flex items-center gap-2"
-                      initial={{ opacity: 0.5 }}
-                      animate={{ opacity: [0.5, 1, 0.5] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <MagicWand size={24} />
-                      Creating magic...
-                    </motion.div>
-                  ) : (
-                    <>
-                      <MagicWand className="mr-2" size={24} />
-                      Make it Better
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <AnimatePresence>
-          {result && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card className="mt-8 border-2 border-accent/20 shadow-xl backdrop-blur">
-                <CardContent className="p-8">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <Sparkle className="text-accent" size={24} weight="duotone" />
-                      <h2 className="text-2xl font-bold">Your Improved Prompt</h2>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="lg" 
-                      onClick={handleCopy}
-                      className="border-2 hover:bg-accent/10 hover:border-accent transition-colors"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="mr-2" size={20} weight="bold" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="mr-2" size={20} />
-                          Copy
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <div className="bg-gradient-to-br from-accent/5 to-primary/5 border-2 border-accent/20 rounded-xl p-6">
-                    <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground">
-                      {result}
-                    </p>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-4 text-center">
-                    Copy this and paste it into ChatGPT, Claude, or any AI assistant
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {result && (
+          <div className="space-y-4 border-t border-white pt-12">
+            <div className="space-y-4">
+              <Textarea
+                value={result}
+                readOnly
+                rows={12}
+                className="text-base resize-none bg-black text-white border-white focus-visible:ring-white focus-visible:ring-offset-0"
+              />
+              <Button 
+                onClick={handleCopy}
+                variant="outline"
+                className="w-full h-12 text-base font-medium bg-black text-white border-white hover:bg-white hover:text-black"
+              >
+                Copy
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
